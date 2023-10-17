@@ -10,15 +10,15 @@ class LayoutSettings extends StatefulWidget {
 }
 
 class LayoutSettingsState extends State<LayoutSettings> {
-  List<String> playerColors = ["Verd", "Blau", "Gris"];
-  List<String> opponentColors = ["Vermell", "Taronja", "Marró"];
+  List<String> taulell = ["Petit (9x9)", "Gran (15x15)"];
+  List<String> mines = ["5", "10", "20"];
 
   // Mostra el CupertinoPicker en un diàleg.
   void _showPicker(String type) {
-    List<String> options = type == "player" ? playerColors : opponentColors;
+    List<String> options = type == "player" ? taulell : mines;
     String title = type == "player"
-        ? "Selecciona el color del jugador"
-        : "Selecciona el color de l'oponent";
+        ? "Selecciona la mida del taulell"
+        : "Selecciona el número de mines";
 
     // Troba l'índex de la opció actual a la llista d'opcions
     AppData appData = Provider.of<AppData>(context, listen: false);
@@ -94,14 +94,14 @@ class LayoutSettingsState extends State<LayoutSettings> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              const Text("Color jugador: "),
+              const Text("Mida del taulell: "),
               CupertinoButton(
                 onPressed: () => _showPicker("player"),
                 child: Text(appData.colorPlayer),
               )
             ]),
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              const Text("Color de l'oponent: "),
+              const Text("Número de mines: "),
               CupertinoButton(
                 onPressed: () => _showPicker("opponent"),
                 child: Text(appData.colorOpponent),
