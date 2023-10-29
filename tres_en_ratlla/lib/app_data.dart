@@ -31,6 +31,11 @@ class AppData with ChangeNotifier {
 
   bool imagesReady = false;
 
+  Timer? gameTimer;
+  int gameTime = 0;
+
+  bool firstSquareSelected = false;
+
   void resetGame() {
     if (midaTablero == 9) {
       board = [
@@ -67,6 +72,8 @@ class AppData with ChangeNotifier {
     gameWinner = '-';
     currentFlagsUsed = 0;
     placeMines();
+    firstSquareSelected = false;
+    gameTime = 0;
   }
 
   // En començar la partida, col·loca les mines en el tauler
@@ -84,9 +91,30 @@ class AppData with ChangeNotifier {
     }
   }
 
+  // Funcio per iniciar el temporitzador de la partida
+  void startTimer() {
+    if (gameTimer == null) {
+      gameTimer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
+        gameTime++;
+        //print(gameTime);
+        notifyListeners();
+      });
+    }
+  }
+  // Funció per parar el temporitzador de la partida
+  void stopTimer() {
+    gameTimer?.cancel();
+    gameTimer = null;
+  }
+
   /*Mina = 'M', Bandera = 'X' 'XO'*/
   // Funció per seleccionar i mostrar les caselles
   void selectSquare(int row, int col) {
+    if (!firstSquareSelected) {
+      startTimer();
+      firstSquareSelected = true;
+    }
+
     if (board[row][col] == 'M') {
       print("Mina trobada amb un click");
       gameIsOver = true; // Informa al programa de que s'ha detonat una mina i acaba el joc
@@ -117,6 +145,7 @@ class AppData with ChangeNotifier {
       board[row][col] = 'X';
       print("S'ha col·locat una bandera");
       currentFlagsUsed++;
+      notifyListeners();
     } else if (board[row][col] == 'M') {
       if ((numeroMinas-currentFlagsUsed) == 0) {
         return;
@@ -124,16 +153,19 @@ class AppData with ChangeNotifier {
       board[row][col] = 'XO';
       print("S'ha col·locat una bandera");
       currentFlagsUsed++;
+      notifyListeners();
     }
     else if (board[row][col] == 'X') {
       board[row][col] = 'FlagRemove';
       print("S'ha tret una bandera ? " + board[row][col]);
       currentFlagsUsed--;
+      notifyListeners();
     }
     else if (board[row][col] == 'XO') {
       board[row][col] = 'M';
       print("S'ha tret una bandera ? " + board[row][col]);
       currentFlagsUsed--;
+      notifyListeners();
     }
   }
 
