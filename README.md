@@ -1,6 +1,6 @@
 # Flutter, Tres en ratlla
 
-Aquest projecte és un exemple de CustomPainter en Flutter
+Autors: Patricio Rojas & Joel Berzal
 
 ## Per configurar un nou sistema
 
