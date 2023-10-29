@@ -10,6 +10,7 @@ class AppData with ChangeNotifier {
 
   int midaTablero = 9;
   int numeroMinas = 5;
+  int numeroBanderes = 0;
 
   List<List<String>> board = [];
   bool gameIsOver = false;
@@ -18,6 +19,11 @@ class AppData with ChangeNotifier {
   ui.Image? imagePlayer;
   ui.Image? imageOpponent;
   bool imagesReady = false;
+
+  Timer? gameTimer;
+  int gameTime = 0;
+
+  bool firstSquareSelected = false;
 
   void resetGame() {
     if (midaTablero == 9) {
@@ -54,6 +60,9 @@ class AppData with ChangeNotifier {
     gameIsOver = false;
     gameWinner = '-';
     placeMines();
+    stopTimer();
+    firstSquareSelected = false;
+    gameTime = 0;
   }
 
   // En començar la partida, col·loca les mines en el tauler
@@ -71,11 +80,33 @@ class AppData with ChangeNotifier {
     }
   }
 
+  // Funcio per iniciar el temporitzador de la partida
+  void startTimer() {
+    if (gameTimer == null) {
+      gameTimer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
+        gameTime++;
+        print(gameTime);
+        notifyListeners();
+      });
+    }
+  }
+
+  // Funció per parar el temporitzador de la partida
+  void stopTimer() {
+    gameTimer?.cancel();
+    gameTimer = null;
+  }
+
   /*Mina = 'MINE', Bandera = 'Flag'*/
   // Funció per seleccionar i mostrar les caselles
   void selectSquare(int row, int col) {
+    if (!firstSquareSelected) {
+      startTimer();
+      firstSquareSelected = true;
+    }
     if (board[row][col] == 'MINE') {
-      print("Mina trobada amb un click");
+      print("Mina trobada");
+      stopTimer(); // S'atura el temporitzador de la partida
       gameIsOver = true; // Informa al programa de que s'ha detonat una mina i acaba el joc
       gameWinner = 'MINE'; // Informa al programa de que el jugador ha perdut
       for (int i = 0; i < midaTablero; i++) {
@@ -85,23 +116,29 @@ class AppData with ChangeNotifier {
           }
         }
       }
+      /*
+      else {
+        searchAdjacentSquares(row, col);
+      }
+      */
     }
-    /*
-    else {
-      searchAdjacentSquares(row, col);
-    }
-    */
   }
 
   void placeRemoveFlag(int row, int col) {
-   // print(board[row][col] + " - row " + row.toString() + " | col " + col.toString());
+    // print(board[row][col] + " - row " + row.toString() + " | col " + col.toString());
+    if (!firstSquareSelected) {
+      startTimer();
+      firstSquareSelected = true;
+    }
     if (board[row][col] == '-' || board[row][col] == 'MINE') {
+      numeroBanderes++;
       board[row][col] = 'X';
-      print("S'ha col·locat una bandera");
+      print("S'ha col·locat una bandera. Total banderes: $numeroBanderes");
     }
     else if (board[row][col] == 'X') {
+      numeroBanderes--;
       board[row][col] = 'FlagRemove';
-      print("S'ha tret una bandera ? " + board[row][col]);
+      print("S'ha tret una bandera ? " + board[row][col] + ". Total banderes: $numeroBanderes");
     }
     /*
     else {

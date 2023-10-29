@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'layout_intro.dart';
 import 'layout_settings.dart';
 import 'layout_play.dart';
+import 'app_data.dart';
 
 // Main application widget
 class App extends StatefulWidget {
@@ -13,6 +14,7 @@ class App extends StatefulWidget {
 
 // Main application state
 class AppState extends State<App> {
+  final AppData appData = AppData();
   // Definir el contingut del widget 'App'
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,7 @@ class AppState extends State<App> {
       routes: {
         'intro': (context) => const LayoutIntro(),
         'settings': (context) => const LayoutSettings(),
-        'play': (context) => const LayoutPlay(),
+        'play': (context) => LayoutPlay(gameTime: appData.gameTime, numeroMinas: appData.numeroMinas, numeroBanderes: appData.numeroBanderes),
       },
     );
   }
