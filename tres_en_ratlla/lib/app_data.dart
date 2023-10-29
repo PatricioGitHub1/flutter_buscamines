@@ -13,10 +13,21 @@ class AppData with ChangeNotifier {
 
   List<List<String>> board = [];
   bool gameIsOver = false;
-  String gameWinner = '-';
+  String gameWinner = '-'; 
 
+  // imagenes
   ui.Image? imagePlayer;
   ui.Image? imageOpponent;
+  
+  ui.Image? image1;
+  ui.Image? image2;
+  ui.Image? image3;
+  ui.Image? image4;
+  ui.Image? image5;
+  ui.Image? image6;
+  ui.Image? image7;
+  ui.Image? image8;
+
   bool imagesReady = false;
 
   void resetGame() {
@@ -80,66 +91,72 @@ class AppData with ChangeNotifier {
       gameWinner = 'MINE'; // Informa al programa de que el jugador ha perdut
       for (int i = 0; i < midaTablero; i++) {
         for (int j = 0; j < midaTablero; j++) {
-          if (board[i][j] == 'MINE') {
+          if (board[i][j] == 'MINE' || board[i][j] == 'XO') {
             board[i][j] = 'O'; // Reveala una mina
           }
         }
       }
     }
-    /*
-    else {
-      searchAdjacentSquares(row, col);
+    if (board[row][col] == 'XO' || board[row][col] == 'X') {
+      return;
     }
-    */
+    else {
+      Set<String> visited = Set();
+      searchAdjacentSquares(row, col, visited);
+    }
+    
   }
 
   void placeRemoveFlag(int row, int col) {
    // print(board[row][col] + " - row " + row.toString() + " | col " + col.toString());
-    if (board[row][col] == '-' || board[row][col] == 'MINE') {
+    if (board[row][col] == '-' ) {
       board[row][col] = 'X';
+      print("S'ha col·locat una bandera");
+    } else if (board[row][col] == 'MINE') {
+      board[row][col] = 'XO';
       print("S'ha col·locat una bandera");
     }
     else if (board[row][col] == 'X') {
       board[row][col] = 'FlagRemove';
       print("S'ha tret una bandera ? " + board[row][col]);
     }
-    /*
-    else {
-      searchAdjacentSquares(row, col);
+    else if (board[row][col] == 'XO') {
+      board[row][col] = 'MINE';
+      print("S'ha tret una bandera ? " + board[row][col]);
     }
-    */
   }
 
   // Booleà que determina si una casella seleccionada té una mina
   bool hasMine(int row, int col) {
-    return board[row][col] == 'O';
+    return board[row][col] == 'MINE';
   }
 
   int countAdjacentMines(int row, int col) {
     int count = 0;
-    for (int i = -1; i <= 1; i++) {
-      for (int j = -1; j <= 1; j++) {
-        if (row + i >= 0 && row + i < midaTablero && col + j >= 0 && col + j < midaTablero) {
-          if (hasMine(row + i, col + j)) {
-            count++;
-          }
+    int n = board.length;
+    int m = board[0].length;
+    for (int dx = (row > 0 ? -1 : 0); dx <= (row < n - 1 ? 1 : 0); dx++) {
+    // Deviation of the column that gets adjusted according to the provided position
+    for (int dy = (col > 0 ? -1 : 0); dy <= (col < m - 1 ? 1 : 0); dy++) {
+      if (dx != 0 || dy != 0) {
+        if (board[row + dx][col + dy] == 'MINE' || board[row + dx][col + dy] == 'XO') {
+          count++;
         }
       }
     }
+  }
     return count;
   }
 
   // Funció recursiva que cerca les caselles adjacents per veure si tenen una mina o una bandera
-  void searchAdjacentSquares(int row, int col) {
-    if (row < 0 || row >= midaTablero || col < 0 || col >= midaTablero) {
+  void searchAdjacentSquares(int row, int col, Set<String> visited) {
+    String position = '$row-$col'; // Representa la posición de la casilla
+    if (row < 0 || row >= midaTablero || col < 0 || col >= midaTablero || visited.contains(position)) {
       return; // Fora dels límits del tauler
     }
-    if (board[row][col] == 'X' || board[row][col] == 'O') {
+    visited.add(position); // Marca la casilla como visitada
+    if (board[row][col] == 'X' || board[row][col] == 'O' || board[row][col] == 'XO') {
       return; // Ja s'ha descobert o té una bandera
-    }
-    if (board[row][col] == 'O' && hasMine(row, col)) {
-      gameIsOver = true; // Informa al programa de que s'ha detonat una mina i acaba el joc
-      return;
     }
     int adjacentMines = countAdjacentMines(row, col);
     if (adjacentMines > 0) {
@@ -147,25 +164,25 @@ class AppData with ChangeNotifier {
       board[row][col] = adjacentMines.toString();
     } else {
       // Cerca les caselles adjacents de manera recursiva
-      board[row][col] = 'O';
-      searchAdjacentSquares(row - 1, col - 1); // Superior-esquerra
-      searchAdjacentSquares(row - 1, col);     // Superior
-      searchAdjacentSquares(row - 1, col + 1); // Superior-dreta
-      searchAdjacentSquares(row, col - 1);     // Esquerra
-      searchAdjacentSquares(row, col + 1);     // Dreta
-      searchAdjacentSquares(row + 1, col - 1); // Inferior-esquerra
-      searchAdjacentSquares(row + 1, col);     // Inferior
-      searchAdjacentSquares(row + 1, col + 1); // Inferior-dreta
+      board[row][col] = 'C';
+      searchAdjacentSquares(row - 1, col - 1, visited); // Superior-esquerra
+      searchAdjacentSquares(row - 1, col, visited);     // Superior
+      searchAdjacentSquares(row - 1, col + 1, visited); // Superior-dreta
+      searchAdjacentSquares(row, col - 1, visited);     // Esquerra
+      searchAdjacentSquares(row, col + 1, visited);     // Dreta
+      searchAdjacentSquares(row + 1, col - 1, visited); // Inferior-esquerra
+      searchAdjacentSquares(row + 1, col, visited);     // Inferior
+      searchAdjacentSquares(row + 1, col + 1, visited); // Inferior-dreta
     }
   }
 
   // Comprova si el jugador ha revelat totes les caselles que no tenen cap mina
   void checkGameStatus() {
-    bool allCellsSelected = true; // De manera predeterminada, el programa asumirà que s'han seleccionat totes les caselles sense mines
+    bool allCellsSelected = true;
     for (int i = 0; i < midaTablero; i++) {
       for (int j = 0; j < midaTablero; j++) {
-        if (board[i][j] != 'MINE' && board[i][j] != 'X') {
-          allCellsSelected = false; // Si es troba una casella que no s'ha seleccionat, el booleà anterior serà false
+        if (board[i][j] == "-" || board[i][j] == "X") {
+          allCellsSelected = false;
         }
       }
     }
@@ -188,7 +205,42 @@ class AppData with ChangeNotifier {
     Image tmpPlayer = Image.asset('assets/images/bandera.png');
     Image tmpOpponent = Image.asset('assets/images/mina.png');
 
+    Image tmp1 = Image.asset('assets/images/1.png');
+    Image tmp2 = Image.asset('assets/images/2.png');
+    
+    Image tmp3 = Image.asset('assets/images/3.png');
+    Image tmp4 = Image.asset('assets/images/4.png');
+    Image tmp5 = Image.asset('assets/images/5.png');
+    Image tmp6 = Image.asset('assets/images/6.png');
+    Image tmp7 = Image.asset('assets/images/7.png');
+    Image tmp8 = Image.asset('assets/images/8.png');
+    
     // Carrega les imatges
+    if (context.mounted) {
+      image1 = await convertWidgetToUiImage(tmp1);
+    }
+    if (context.mounted) {
+      image2 = await convertWidgetToUiImage(tmp2);
+    }
+
+    if (context.mounted) {
+      image3 = await convertWidgetToUiImage(tmp3);
+    }
+    if (context.mounted) {
+      image4 = await convertWidgetToUiImage(tmp4);
+    }
+    if (context.mounted) {
+      image5 = await convertWidgetToUiImage(tmp5);
+    }
+    if (context.mounted) {
+      image6 = await convertWidgetToUiImage(tmp6);
+    }
+    if (context.mounted) {
+      image7 = await convertWidgetToUiImage(tmp7);
+    }
+    if (context.mounted) {
+      image8 = await convertWidgetToUiImage(tmp8);
+    }
     if (context.mounted) {
       imagePlayer = await convertWidgetToUiImage(tmpPlayer);
     }
@@ -211,5 +263,19 @@ class AppData with ChangeNotifier {
           ),
         );
     return completer.future;
+  }
+
+  void printBoardConsole() {
+    print("======================================================0");
+    for (int i = 0; i != board.length; i++) {
+      print(board[i]);
+    }
+  }
+
+  bool isNumeric(String s) {
+    if (s == null) {
+      return false;
+    }
+    return double.tryParse(s) != null;
   }
 }

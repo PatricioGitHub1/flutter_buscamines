@@ -111,18 +111,20 @@ class WidgetTresRatllaPainter extends CustomPainter {
       ..strokeWidth = strokeWidth;
     canvas.drawCircle(Offset(x, y), radius, paint);
   }
-
-  void drawEmptySquare(Canvas canvas, Offset x, Offset y,
-      Color color, double strokeWidth) {
-    final Paint paint = Paint()
+  */
+  void drawEmptySquare(Canvas canvas, Offset topLeft, Offset bottomRight, Color color, double strokeWidth) {
+  final Paint paint = Paint()
     ..color = color
     ..strokeWidth = strokeWidth;
 
-    Rect rectangle = Rect.fromPoints(x,y);
-    canvas.drawRect(rectangle, paint);
-    
-  }
-  */
+  // Adjust the size of the rectangle to make it smaller
+  Rect rectangle = Rect.fromPoints(
+    Offset(topLeft.dx + 5, topLeft.dy + 5),
+    Offset(bottomRight.dx - 5, bottomRight.dy - 5),
+  );
+
+  canvas.drawRect(rectangle, paint);
+}
 
   // Dibuixa el taulell de joc (creus i rodones)
   void drawBoardStatus(Canvas canvas, Size size) {
@@ -132,7 +134,7 @@ class WidgetTresRatllaPainter extends CustomPainter {
 
     for (int i = 0; i < appData.midaTablero; i++) {
       for (int j = 0; j < appData.midaTablero; j++) {
-        if (appData.board[i][j] == 'X') {
+        if (appData.board[i][j] == 'X' || appData.board[i][j] == 'XO') {
           // Dibuixar una X amb el color del jugador
           Color color = Colors.blue;
           switch (appData.colorPlayer) {
@@ -187,7 +189,52 @@ class WidgetTresRatllaPainter extends CustomPainter {
           // drawEmptySquare(canvas, Offset(x0, y0),Offset(x1, y1), Colors.white, 5.0);
           appData.board[i][j] = '-';
           print("Ha hecho doble click" + appData.board[i][j]);
+
+        } else if (appData.board[i][j] == 'C') {
+          double x0 = j * cellWidth;
+          double y0 = i * cellHeight;
+          double x1 = (j + 1) * cellWidth;
+          double y1 = (i + 1) * cellHeight;
+          // pintar la casillas reveladas con marron suave
+          drawEmptySquare(canvas, Offset(x0, y0),Offset(x1, y1), Colors.brown.shade400, 5.0);
         }
+        
+        else if (appData.isNumeric(appData.board[i][j])) {
+          double x0 = j * cellWidth;
+          double y0 = i * cellHeight;
+          double x1 = (j + 1) * cellWidth;
+          double y1 = (i + 1) * cellHeight;
+          // pintar la casillas reveladas con marron suave
+          drawEmptySquare(canvas, Offset(x0, y0),Offset(x1, y1), Colors.brown.shade400, 5.0);
+
+          switch(appData.board[i][j]) {
+              case "1":
+              drawImage(canvas, appData.image1!, x0, y0, x1, y1);
+              break;
+              case "2":
+              drawImage(canvas, appData.image2!, x0, y0, x1, y1);
+              break;
+              case "3":
+              drawImage(canvas, appData.image3!, x0, y0, x1, y1);
+              break;
+              case "4":
+              drawImage(canvas, appData.image4!, x0, y0, x1, y1);
+              break;
+              case "5":
+              drawImage(canvas, appData.image5!, x0, y0, x1, y1);
+              break;
+              case "6":
+              drawImage(canvas, appData.image6!, x0, y0, x1, y1);
+              break;
+              case "7":
+              drawImage(canvas, appData.image7!, x0, y0, x1, y1);
+              break;
+              case "8":
+              drawImage(canvas, appData.image8!, x0, y0, x1, y1);
+              break;
+          }
+        }
+
       }
     }
   }
@@ -232,7 +279,11 @@ class WidgetTresRatllaPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     drawBoardLines(canvas, size);
+    //
+    appData.printBoardConsole();
     drawBoardStatus(canvas, size);
+    // Comprueba estado del game
+    appData.checkGameStatus();
     if (appData.gameIsOver) {
       if (appData.gameWinner == 'MINE') {
         drawGameOver(canvas, size, "Has perdut. Torna-ho a intentar.");
