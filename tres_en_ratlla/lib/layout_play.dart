@@ -19,6 +19,7 @@ class LayoutPlayState extends State<LayoutPlay> {
             Navigator.of(context).pop();
           },
         ),
+        trailing: const Text("fefef"),
       ),
       child: const SafeArea(
         child: WidgetTresRatlla(),

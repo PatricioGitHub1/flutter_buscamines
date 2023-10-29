@@ -10,6 +10,7 @@ class AppData with ChangeNotifier {
 
   int midaTablero = 9;
   int numeroMinas = 5;
+  int currentFlagsUsed = 0;
 
   List<List<String>> board = [];
   bool gameIsOver = false;
@@ -64,6 +65,7 @@ class AppData with ChangeNotifier {
     }
     gameIsOver = false;
     gameWinner = '-';
+    currentFlagsUsed = 0;
     placeMines();
   }
 
@@ -74,24 +76,24 @@ class AppData with ChangeNotifier {
       while (true) {
         int row = random.nextInt(midaTablero);  // Genera una fila aleatoria
         int col = random.nextInt(midaTablero);  // Genera una columna aleatoria
-        if (board[row][col] == '-' && board[row][col] != 'MINE') {
-          board[row][col] = 'MINE';
+        if (board[row][col] == '-' && board[row][col] != 'M') {
+          board[row][col] = 'M';
           break;
         }
       }
     }
   }
 
-  /*Mina = 'MINE', Bandera = 'Flag'*/
+  /*Mina = 'M', Bandera = 'X' 'XO'*/
   // Funció per seleccionar i mostrar les caselles
   void selectSquare(int row, int col) {
-    if (board[row][col] == 'MINE') {
+    if (board[row][col] == 'M') {
       print("Mina trobada amb un click");
       gameIsOver = true; // Informa al programa de que s'ha detonat una mina i acaba el joc
-      gameWinner = 'MINE'; // Informa al programa de que el jugador ha perdut
+      gameWinner = 'M'; // Informa al programa de que el jugador ha perdut
       for (int i = 0; i < midaTablero; i++) {
         for (int j = 0; j < midaTablero; j++) {
-          if (board[i][j] == 'MINE' || board[i][j] == 'XO') {
+          if (board[i][j] == 'M' || board[i][j] == 'XO') {
             board[i][j] = 'O'; // Reveala una mina
           }
         }
@@ -108,27 +110,36 @@ class AppData with ChangeNotifier {
   }
 
   void placeRemoveFlag(int row, int col) {
-   // print(board[row][col] + " - row " + row.toString() + " | col " + col.toString());
     if (board[row][col] == '-' ) {
+      if ((numeroMinas-currentFlagsUsed) == 0) {
+        return;
+      }
       board[row][col] = 'X';
       print("S'ha col·locat una bandera");
-    } else if (board[row][col] == 'MINE') {
+      currentFlagsUsed++;
+    } else if (board[row][col] == 'M') {
+      if ((numeroMinas-currentFlagsUsed) == 0) {
+        return;
+      }
       board[row][col] = 'XO';
       print("S'ha col·locat una bandera");
+      currentFlagsUsed++;
     }
     else if (board[row][col] == 'X') {
       board[row][col] = 'FlagRemove';
       print("S'ha tret una bandera ? " + board[row][col]);
+      currentFlagsUsed--;
     }
     else if (board[row][col] == 'XO') {
-      board[row][col] = 'MINE';
+      board[row][col] = 'M';
       print("S'ha tret una bandera ? " + board[row][col]);
+      currentFlagsUsed--;
     }
   }
 
   // Booleà que determina si una casella seleccionada té una mina
   bool hasMine(int row, int col) {
-    return board[row][col] == 'MINE';
+    return board[row][col] == 'M';
   }
 
   int countAdjacentMines(int row, int col) {
@@ -139,7 +150,7 @@ class AppData with ChangeNotifier {
     // Deviation of the column that gets adjusted according to the provided position
     for (int dy = (col > 0 ? -1 : 0); dy <= (col < m - 1 ? 1 : 0); dy++) {
       if (dx != 0 || dy != 0) {
-        if (board[row + dx][col + dy] == 'MINE' || board[row + dx][col + dy] == 'XO') {
+        if (board[row + dx][col + dy] == 'M' || board[row + dx][col + dy] == 'XO') {
           count++;
         }
       }

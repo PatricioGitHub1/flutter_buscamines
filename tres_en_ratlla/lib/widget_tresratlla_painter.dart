@@ -285,7 +285,7 @@ class WidgetTresRatllaPainter extends CustomPainter {
     // Comprueba estado del game
     appData.checkGameStatus();
     if (appData.gameIsOver) {
-      if (appData.gameWinner == 'MINE') {
+      if (appData.gameWinner == 'M') {
         drawGameOver(canvas, size, "Has perdut. Torna-ho a intentar.");
       }
       else {

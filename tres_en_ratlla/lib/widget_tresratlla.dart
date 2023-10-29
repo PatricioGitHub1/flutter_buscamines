@@ -44,6 +44,7 @@ class WidgetTresRatllaState extends State<WidgetTresRatlla> {
         final int col =
             (details.localPosition.dx / (context.size!.width / appData.midaTablero)).floor();
         appData.placeRemoveFlag(row, col);
+        print("Bandera usadas = "+(appData.numeroMinas-appData.currentFlagsUsed).toString());
         setState(() {}); // Actualitza la vista
       },
       child: SizedBox(
