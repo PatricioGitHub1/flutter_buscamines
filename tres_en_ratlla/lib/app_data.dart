@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
@@ -6,6 +7,9 @@ class AppData with ChangeNotifier {
   // App status
   String colorPlayer = "Verd";
   String colorOpponent = "Taronja";
+
+  int midaTablero = 9;
+  int numeroMinas = 5;
 
   List<List<String>> board = [];
   bool gameIsOver = false;
@@ -16,88 +20,158 @@ class AppData with ChangeNotifier {
   bool imagesReady = false;
 
   void resetGame() {
-    board = [
-      ['-', '-', '-'],
-      ['-', '-', '-'],
-      ['-', '-', '-'],
-    ];
+    if (midaTablero == 9) {
+      board = [
+        ['-', '-', '-','-', '-', '-','-', '-', '-'],
+        ['-', '-', '-','-', '-', '-','-', '-', '-'],
+        ['-', '-', '-','-', '-', '-','-', '-', '-'],
+        ['-', '-', '-','-', '-', '-','-', '-', '-'],
+        ['-', '-', '-','-', '-', '-','-', '-', '-'],
+        ['-', '-', '-','-', '-', '-','-', '-', '-'],
+        ['-', '-', '-','-', '-', '-','-', '-', '-'],
+        ['-', '-', '-','-', '-', '-','-', '-', '-'],
+        ['-', '-', '-','-', '-', '-','-', '-', '-'],
+      ];
+    } else if (midaTablero == 15) {
+      board = [
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+        ['-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-','-', '-', '-',],
+      ];
+    }
     gameIsOver = false;
     gameWinner = '-';
+    placeMines();
   }
 
-  // Fa una jugada, primer el jugador després la maquina
-  void playMove(int row, int col) {
-    if (board[row][col] == '-') {
-      board[row][col] = 'X';
-      checkGameWinner();
-      if (gameWinner == '-') {
-        machinePlay();
-      }
-    }
-  }
-
-  // Fa una jugada de la màquina, només busca la primera posició lliure
-  void machinePlay() {
-    bool moveMade = false;
-
-    // Buscar una casella lliure '-'
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        if (board[i][j] == '-') {
-          board[i][j] = 'O';
-          moveMade = true;
+  // En començar la partida, col·loca les mines en el tauler
+  void placeMines() {
+    Random random = new Random();
+    for (int i=0; i < numeroMinas; i++) {
+      while (true) {
+        int row = random.nextInt(midaTablero);  // Genera una fila aleatoria
+        int col = random.nextInt(midaTablero);  // Genera una columna aleatoria
+        if (board[row][col] == '-' && board[row][col] != 'MINE') {
+          board[row][col] = 'MINE';
           break;
         }
       }
-      if (moveMade) break;
     }
-
-    checkGameWinner();
   }
 
-  // Comprova si el joc ja té un tres en ratlla
-  // No comprova la situació d'empat
-  void checkGameWinner() {
-    for (int i = 0; i < 3; i++) {
-      // Comprovar files
-      if (board[i][0] == board[i][1] &&
-          board[i][1] == board[i][2] &&
-          board[i][0] != '-') {
-        gameIsOver = true;
-        gameWinner = board[i][0];
-        return;
-      }
-
-      // Comprovar columnes
-      if (board[0][i] == board[1][i] &&
-          board[1][i] == board[2][i] &&
-          board[0][i] != '-') {
-        gameIsOver = true;
-        gameWinner = board[0][i];
-        return;
+  /*Mina = 'MINE', Bandera = 'Flag'*/
+  // Funció per seleccionar i mostrar les caselles
+  void selectSquare(int row, int col) {
+    if (board[row][col] == 'MINE') {
+      print("Mina trobada amb un click");
+      gameIsOver = true; // Informa al programa de que s'ha detonat una mina i acaba el joc
+      gameWinner = 'MINE'; // Informa al programa de que el jugador ha perdut
+      for (int i = 0; i < midaTablero; i++) {
+        for (int j = 0; j < midaTablero; j++) {
+          if (board[i][j] == 'MINE') {
+            board[i][j] = 'O'; // Reveala una mina
+          }
+        }
       }
     }
+    /*
+    else {
+      searchAdjacentSquares(row, col);
+    }
+    */
+  }
 
-    // Comprovar diagonal principal
-    if (board[0][0] == board[1][1] &&
-        board[1][1] == board[2][2] &&
-        board[0][0] != '-') {
-      gameIsOver = true;
-      gameWinner = board[0][0];
+  void placeRemoveFlag(int row, int col) {
+   // print(board[row][col] + " - row " + row.toString() + " | col " + col.toString());
+    if (board[row][col] == '-' || board[row][col] == 'MINE') {
+      board[row][col] = 'X';
+      print("S'ha col·locat una bandera");
+    }
+    else if (board[row][col] == 'X') {
+      board[row][col] = 'FlagRemove';
+      print("S'ha tret una bandera ? " + board[row][col]);
+    }
+    /*
+    else {
+      searchAdjacentSquares(row, col);
+    }
+    */
+  }
+
+  // Booleà que determina si una casella seleccionada té una mina
+  bool hasMine(int row, int col) {
+    return board[row][col] == 'O';
+  }
+
+  int countAdjacentMines(int row, int col) {
+    int count = 0;
+    for (int i = -1; i <= 1; i++) {
+      for (int j = -1; j <= 1; j++) {
+        if (row + i >= 0 && row + i < midaTablero && col + j >= 0 && col + j < midaTablero) {
+          if (hasMine(row + i, col + j)) {
+            count++;
+          }
+        }
+      }
+    }
+    return count;
+  }
+
+  // Funció recursiva que cerca les caselles adjacents per veure si tenen una mina o una bandera
+  void searchAdjacentSquares(int row, int col) {
+    if (row < 0 || row >= midaTablero || col < 0 || col >= midaTablero) {
+      return; // Fora dels límits del tauler
+    }
+    if (board[row][col] == 'X' || board[row][col] == 'O') {
+      return; // Ja s'ha descobert o té una bandera
+    }
+    if (board[row][col] == 'O' && hasMine(row, col)) {
+      gameIsOver = true; // Informa al programa de que s'ha detonat una mina i acaba el joc
       return;
     }
-
-    // Comprovar diagonal secundària
-    if (board[0][2] == board[1][1] &&
-        board[1][1] == board[2][0] &&
-        board[0][2] != '-') {
-      gameIsOver = true;
-      gameWinner = board[0][2];
-      return;
+    int adjacentMines = countAdjacentMines(row, col);
+    if (adjacentMines > 0) {
+      // Mostra el número de mines adjacents
+      board[row][col] = adjacentMines.toString();
+    } else {
+      // Cerca les caselles adjacents de manera recursiva
+      board[row][col] = 'O';
+      searchAdjacentSquares(row - 1, col - 1); // Superior-esquerra
+      searchAdjacentSquares(row - 1, col);     // Superior
+      searchAdjacentSquares(row - 1, col + 1); // Superior-dreta
+      searchAdjacentSquares(row, col - 1);     // Esquerra
+      searchAdjacentSquares(row, col + 1);     // Dreta
+      searchAdjacentSquares(row + 1, col - 1); // Inferior-esquerra
+      searchAdjacentSquares(row + 1, col);     // Inferior
+      searchAdjacentSquares(row + 1, col + 1); // Inferior-dreta
     }
+  }
 
-    // No hi ha guanyador, torna '-'
-    gameWinner = '-';
+  // Comprova si el jugador ha revelat totes les caselles que no tenen cap mina
+  void checkGameStatus() {
+    bool allCellsSelected = true; // De manera predeterminada, el programa asumirà que s'han seleccionat totes les caselles sense mines
+    for (int i = 0; i < midaTablero; i++) {
+      for (int j = 0; j < midaTablero; j++) {
+        if (board[i][j] != 'MINE' && board[i][j] != 'X') {
+          allCellsSelected = false; // Si es troba una casella que no s'ha seleccionat, el booleà anterior serà false
+        }
+      }
+    }
+    if (allCellsSelected) {
+      gameIsOver = true; // Informa al programa de que s'ha detonat una mina i acaba el joc
+    }
   }
 
   // Carrega les imatges per dibuixar-les al Canvas
@@ -111,8 +185,8 @@ class AppData with ChangeNotifier {
     // Força simular un loading
     await Future.delayed(const Duration(milliseconds: 500));
 
-    Image tmpPlayer = Image.asset('assets/images/player.png');
-    Image tmpOpponent = Image.asset('assets/images/opponent.png');
+    Image tmpPlayer = Image.asset('assets/images/bandera.png');
+    Image tmpOpponent = Image.asset('assets/images/mina.png');
 
     // Carrega les imatges
     if (context.mounted) {
