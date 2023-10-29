@@ -16,6 +16,7 @@ class WidgetTresRatllaPainter extends CustomPainter {
       ..strokeWidth = 5.0;
 
     // Definim els punts on es creuaran les línies verticals
+    /*
     final double firstVertical = size.width / 3;
     final double secondVertical = 2 * size.width / 3;
 
@@ -25,8 +26,22 @@ class WidgetTresRatllaPainter extends CustomPainter {
     canvas.drawLine(
         Offset(secondVertical, 0), Offset(secondVertical, size.height), paint);
 
+    */
+    int value_tablero = appData.midaTablero;
+    for (int i = 1; i != (value_tablero+1); i++) {
+        // linias verticales
+        final double vertical = i * size.width / value_tablero;
+        canvas.drawLine(
+          Offset(vertical, 0), Offset(vertical, size.height), paint
+        );
+        // linias horizontales
+        final double horizontal = i * size.height / value_tablero;
+        canvas.drawLine(
+          Offset(0, horizontal), Offset(size.width, horizontal), paint);
+    }
+
     // Definim els punts on es creuaran les línies horitzontals
-    final double firstHorizontal = size.height / 3;
+    /*final double firstHorizontal = size.height / 3;
     final double secondHorizontal = 2 * size.height / 3;
 
     // Dibuixem les línies horitzontals
@@ -34,6 +49,7 @@ class WidgetTresRatllaPainter extends CustomPainter {
         Offset(0, firstHorizontal), Offset(size.width, firstHorizontal), paint);
     canvas.drawLine(Offset(0, secondHorizontal),
         Offset(size.width, secondHorizontal), paint);
+    */
   }
 
   // Dibuixa la imatge centrada a una casella del taulell
@@ -66,7 +82,8 @@ class WidgetTresRatllaPainter extends CustomPainter {
     canvas.drawImageRect(image, srcRect, dstRect, Paint());
   }
 
-  // Dibuia una creu centrada a una casella del taulell
+  /*
+  // Dibuixa una creu centrada a una casella del taulell
   void drawCross(Canvas canvas, double x0, double y0, double x1, double y1,
       Color color, double strokeWidth) {
     Paint paint = Paint()
@@ -94,16 +111,30 @@ class WidgetTresRatllaPainter extends CustomPainter {
       ..strokeWidth = strokeWidth;
     canvas.drawCircle(Offset(x, y), radius, paint);
   }
+  */
+  void drawEmptySquare(Canvas canvas, Offset topLeft, Offset bottomRight, Color color, double strokeWidth) {
+  final Paint paint = Paint()
+    ..color = color
+    ..strokeWidth = strokeWidth;
+
+  // Adjust the size of the rectangle to make it smaller
+  Rect rectangle = Rect.fromPoints(
+    Offset(topLeft.dx + 5, topLeft.dy + 5),
+    Offset(bottomRight.dx - 5, bottomRight.dy - 5),
+  );
+
+  canvas.drawRect(rectangle, paint);
+}
 
   // Dibuixa el taulell de joc (creus i rodones)
   void drawBoardStatus(Canvas canvas, Size size) {
     // Dibuixar 'X' i 'O' del tauler
-    double cellWidth = size.width / 3;
-    double cellHeight = size.height / 3;
+    double cellWidth = size.width / appData.midaTablero;
+    double cellHeight = size.height / appData.midaTablero;
 
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        if (appData.board[i][j] == 'X') {
+    for (int i = 0; i < appData.midaTablero; i++) {
+      for (int j = 0; j < appData.midaTablero; j++) {
+        if (appData.board[i][j] == 'X' || appData.board[i][j] == 'XO') {
           // Dibuixar una X amb el color del jugador
           Color color = Colors.blue;
           switch (appData.colorPlayer) {
@@ -122,9 +153,8 @@ class WidgetTresRatllaPainter extends CustomPainter {
           double y0 = i * cellHeight;
           double x1 = (j + 1) * cellWidth;
           double y1 = (i + 1) * cellHeight;
-
           drawImage(canvas, appData.imagePlayer!, x0, y0, x1, y1);
-          drawCross(canvas, x0, y0, x1, y1, color, 5.0);
+          // drawCross(canvas, x0, y0, x1, y1, color, 5.0);
         } else if (appData.board[i][j] == 'O') {
           // Dibuixar una O amb el color de l'oponent
           Color color = Colors.blue;
@@ -149,15 +179,68 @@ class WidgetTresRatllaPainter extends CustomPainter {
           double radius = (min(cellWidth, cellHeight) / 2) - 5;
 
           drawImage(canvas, appData.imageOpponent!, x0, y0, x1, y1);
-          drawCircle(canvas, cX, cY, radius, color, 5.0);
+          // drawCircle(canvas, cX, cY, radius, color, 5.0);
+
+        } else if (appData.board[i][j] == 'FlagRemove') {
+          double x0 = j * cellWidth;
+          double y0 = i * cellHeight;
+          double x1 = (j + 1) * cellWidth;
+          double y1 = (i + 1) * cellHeight;
+          // drawEmptySquare(canvas, Offset(x0, y0),Offset(x1, y1), Colors.white, 5.0);
+          appData.board[i][j] = '-';
+          print("Ha hecho doble click" + appData.board[i][j]);
+
+        } else if (appData.board[i][j] == 'C') {
+          double x0 = j * cellWidth;
+          double y0 = i * cellHeight;
+          double x1 = (j + 1) * cellWidth;
+          double y1 = (i + 1) * cellHeight;
+          // pintar la casillas reveladas con marron suave
+          drawEmptySquare(canvas, Offset(x0, y0),Offset(x1, y1), Colors.brown.shade400, 5.0);
         }
+        
+        else if (appData.isNumeric(appData.board[i][j])) {
+          double x0 = j * cellWidth;
+          double y0 = i * cellHeight;
+          double x1 = (j + 1) * cellWidth;
+          double y1 = (i + 1) * cellHeight;
+          // pintar la casillas reveladas con marron suave
+          drawEmptySquare(canvas, Offset(x0, y0),Offset(x1, y1), Colors.brown.shade400, 5.0);
+
+          switch(appData.board[i][j]) {
+              case "1":
+              drawImage(canvas, appData.image1!, x0, y0, x1, y1);
+              break;
+              case "2":
+              drawImage(canvas, appData.image2!, x0, y0, x1, y1);
+              break;
+              case "3":
+              drawImage(canvas, appData.image3!, x0, y0, x1, y1);
+              break;
+              case "4":
+              drawImage(canvas, appData.image4!, x0, y0, x1, y1);
+              break;
+              case "5":
+              drawImage(canvas, appData.image5!, x0, y0, x1, y1);
+              break;
+              case "6":
+              drawImage(canvas, appData.image6!, x0, y0, x1, y1);
+              break;
+              case "7":
+              drawImage(canvas, appData.image7!, x0, y0, x1, y1);
+              break;
+              case "8":
+              drawImage(canvas, appData.image8!, x0, y0, x1, y1);
+              break;
+          }
+        }
+
       }
     }
   }
 
   // Dibuixa el missatge de joc acabat
-  void drawGameOver(Canvas canvas, Size size) {
-    String message = "El joc ha acabat. Ha guanyat ${appData.gameWinner}!";
+  void drawGameOver(Canvas canvas, Size size, String message) {
 
     const textStyle = TextStyle(
       color: Colors.black,
@@ -196,9 +279,21 @@ class WidgetTresRatllaPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     drawBoardLines(canvas, size);
+    //
+    appData.printBoardConsole();
     drawBoardStatus(canvas, size);
-    if (appData.gameWinner != '-') {
-      drawGameOver(canvas, size);
+    // Comprueba estado del game
+    appData.checkGameStatus();
+    if (appData.gameIsOver) {
+      // Para el timer de la barra
+      appData.stopTimer();
+
+      if (appData.gameWinner == 'M') {
+        drawGameOver(canvas, size, "Has perdut. Torna-ho a intentar.");
+      }
+      else {
+        drawGameOver(canvas, size, "Has guanyat. Felicitats!");
+      }
     }
   }
 

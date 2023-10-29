@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'app_data.dart';
-
+// rama patri
 class LayoutSettings extends StatefulWidget {
   const LayoutSettings({Key? key}) : super(key: key);
 
@@ -10,20 +10,20 @@ class LayoutSettings extends StatefulWidget {
 }
 
 class LayoutSettingsState extends State<LayoutSettings> {
-  List<String> taulell = ["Petit (9x9)", "Gran (15x15)"];
-  List<String> mines = ["5", "10", "20"];
+  List<int> taulell = [9, 15];
+  List<int> mines = [5, 10, 20];
 
   // Mostra el CupertinoPicker en un diàleg.
   void _showPicker(String type) {
-    List<String> options = type == "player" ? taulell : mines;
-    String title = type == "player"
+    List<int> options = type == "tabla" ? taulell : mines;
+    String title = type == "tabla"
         ? "Selecciona la mida del taulell"
         : "Selecciona el número de mines";
 
     // Troba l'índex de la opció actual a la llista d'opcions
     AppData appData = Provider.of<AppData>(context, listen: false);
-    String currentValue =
-        type == "player" ? appData.colorPlayer : appData.colorOpponent;
+    int currentValue =
+        type == "tabla" ? appData.midaTablero : appData.numeroMinas;
     int currentIndex = options.indexOf(currentValue);
     FixedExtentScrollController scrollController =
         FixedExtentScrollController(initialItem: currentIndex);
@@ -56,16 +56,16 @@ class LayoutSettingsState extends State<LayoutSettings> {
                   itemExtent: 32.0,
                   scrollController: scrollController,
                   onSelectedItemChanged: (index) {
-                    if (type == "player") {
-                      appData.colorPlayer = options[index];
+                    if (type == "tabla") {
+                      appData.midaTablero = options[index];
                     } else {
-                      appData.colorOpponent = options[index];
+                      appData.numeroMinas = options[index];
                     }
                     // Actualitzar el widget
                     setState(() {});
                   },
                   children: options
-                      .map((color) => Center(child: Text(color)))
+                      .map((color) => Center(child: Text(color.toString())))
                       .toList(),
                 ),
               ),
@@ -96,15 +96,15 @@ class LayoutSettingsState extends State<LayoutSettings> {
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               const Text("Mida del taulell: "),
               CupertinoButton(
-                onPressed: () => _showPicker("player"),
-                child: Text(appData.colorPlayer),
+                onPressed: () => _showPicker("tabla"),
+                child: Text(appData.midaTablero.toString()),
               )
             ]),
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               const Text("Número de mines: "),
               CupertinoButton(
-                onPressed: () => _showPicker("opponent"),
-                child: Text(appData.colorOpponent),
+                onPressed: () => _showPicker("mines"),
+                child: Text(appData.numeroMinas.toString()),
               )
             ]),
           ],

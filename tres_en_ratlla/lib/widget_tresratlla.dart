@@ -30,11 +30,21 @@ class WidgetTresRatllaState extends State<WidgetTresRatlla> {
     return GestureDetector(
       onTapUp: (TapUpDetails details) {
         final int row =
-            (details.localPosition.dy / (context.size!.height / 3)).floor();
+            (details.localPosition.dy / (context.size!.height / appData.midaTablero)).floor();
         final int col =
-            (details.localPosition.dx / (context.size!.width / 3)).floor();
+            (details.localPosition.dx / (context.size!.width / appData.midaTablero)).floor();
 
-        appData.playMove(row, col);
+        //appData.playMove(row, col);
+
+        appData.selectSquare(row,col);
+        setState(() {}); // Actualitza la vista
+      }, onDoubleTapDown: (details) {
+        final int row =
+            (details.localPosition.dy / (context.size!.height / appData.midaTablero)).floor();
+        final int col =
+            (details.localPosition.dx / (context.size!.width / appData.midaTablero)).floor();
+        appData.placeRemoveFlag(row, col);
+        print("Bandera usadas = "+(appData.numeroMinas-appData.currentFlagsUsed).toString());
         setState(() {}); // Actualitza la vista
       },
       child: SizedBox(
@@ -53,21 +63,29 @@ class WidgetTresRatllaState extends State<WidgetTresRatlla> {
               return GestureDetector(
                 onTapUp: (TapUpDetails details) {
                   final int row =
-                      (details.localPosition.dy / (context.size!.height / 3))
+                      (details.localPosition.dy / (context.size!.height / appData.midaTablero))
                           .floor();
                   final int col =
-                      (details.localPosition.dx / (context.size!.width / 3))
+                      (details.localPosition.dx / (context.size!.width / appData.midaTablero))
                           .floor();
 
-                  appData.playMove(row, col);
+                  //appData.playMove(row, col);
+                  appData.selectSquare(row,col);
                   setState(() {}); // Actualitza la vista
-                },
+                }, /*onDoubleTapDown: (details) {
+                    final int row =
+                        (details.localPosition.dy / (context.size!.height / appData.midaTablero)).floor();
+                    final int col =
+                        (details.localPosition.dx / (context.size!.width / appData.midaTablero)).floor();
+                    appData.placeRemoveFlag(row, col);
+                    setState(() {}); // Actualitza la vista
+                  },*/
                 child: SizedBox(
                   width: MediaQuery.of(context)
                       .size
                       .width, // Ocupa tot l'ample de la pantalla
                   height: MediaQuery.of(context).size.height -
-                      56.0, // Ocupa tota l'altura disponible menys l'altura de l'AppBar
+                      56.0 * 2, // Ocupa tota l'altura disponible menys l'altura de l'AppBar
                   child: CustomPaint(
                     painter: WidgetTresRatllaPainter(appData),
                   ),
